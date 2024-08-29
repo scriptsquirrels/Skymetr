@@ -1,0 +1,67 @@
+import os
+import requests
+import tkinter as tk
+from PIL import ImageTk, Image
+
+API_KEY = os.environ["WEATHERAPI"]
+LAT = 41.878113
+LONG = -87.629799
+URL = f"https://api.openweathermap.org/data/2.5/weather?units=imperial&lat={LAT}&lon={LONG}&appid={API_KEY}"
+
+class WeatherApp(tk.Tk):
+  def __init__(self):
+    tk.Tk.__init__(self)
+    self.title("Welcome to Skymetr")
+
+    self.width = self.winfo_screenwidth()
+    self.height = self.winfo_screenheight()
+    self.geometry(f"{self.width}x{self.height}")
+
+    self.getWeatherData()
+    self.setWeatherData()
+
+  def getWeatherData(self):
+    response = requests.get(URL)
+    data = response.json()
+    self.data = response.json()["main"]
+    print(self.data)
+  
+  def setWeatherData(self):
+    # TEMPERATURE
+    tempFrame = tk.Frame(self, height=(self.height//2), width=(self.width//2), bg="seashell")
+    tempFrame.grid(column=1, row=1)
+
+    tempLabel = tk.Label(tempFrame, text=f"{self.data['temp']}°F")
+    tempLabel.config(font=("Times", 75, "bold"), bg="seashell")
+    tempLabel.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+    # IMAGE
+    ImageFrame = tk.Frame(self, height=(self.height//2), width=(self.width//2), bg="seashell")
+    ImageFrame.grid(column=2, row=1)
+
+    sunImage = ImageTk.PhotoImage(Image.open('sun.png').resize((200, 200)))
+    sunLabel = tk.Label(ImageFrame, image=sunImage)
+    sunLabel.photo= sunImage
+    sunLabel.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+    # minMAX
+    minMAXFrame = tk.Frame(self, height=(self.height//2), width=(self.width//2), bg="tan")
+    minMAXFrame.grid(column=1, row=2)
+
+    minMAXText = f"- Min: {self.data['temp_min']}°F\n- Max: {self.data['temp_max']}°F"
+    minMAXLabel = tk.Label(minMAXFrame, text=minMAXText)
+    minMAXLabel.config(font=("Times", 50), bg="tan")
+    minMAXLabel.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+   
+    #Extra
+    extraFrame = tk.Frame(self, height=(self.height//2), width=(self.width//2), bg="tan")
+    extraFrame.grid(column=2, row=2)
+
+    extraText = f"Feels Like: {self.data['feels_like']}°F\nHumidity: {self.data['humidity']}%"
+    extraLabel = tk.Label(extraFrame, text=extraText)
+    extraLabel.config(font=("Times", 35), bg="tan")
+    extraLabel.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
+
+
+app = WeatherApp()
+app.mainloop()
